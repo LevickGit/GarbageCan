@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        ul{
+            overflow: hidden;
+        }
+        li{
+            width: 80px;
+            height: 50px;
+            text-align: center;
+            line-height: 50px;
+            border:1px solid #000;
+            margin: 20px;
+            list-style: none;
+            float: left;
+        }
+        #out{
+            width: 150px;
+            height: 200px;
+            background: url(img/can.png) 5px 30px  no-repeat;/*不平铺*/
+            margin: 100px;
+            background-size: 100%;
+            color: #00a8ff;
+            border: 4px solid #000;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        <!--想要使文本元素实现被拖放，利用draggable属性设置为true，使li可以被拖拽-->
+        <ul>
+            <li draggable="true">白色垃圾</li>
+            <li draggable="true">香蕉皮</li>
+            <li draggable="true">易拉罐</li>
+            <li draggable="true">废纸屑</li>
+            <li draggable="true">旧电池</li>
+        </ul>
+
+        <p id="txt"></p>
+        <div id="out"><b>垃圾箱</b></div>
+    </div>
+</body>
+<script type="text/javascript">
+    /*先在js中获取一下需要用到的dom元素,包括每一个“li”元素，因为它要执行拖拽事件；
+      接着是显示元素“p”标签以及垃圾桶对象“div”元素*/
+    window.onload=function () {
+        var aLi=document.getElementsByTagName('li');
+        var oDiv=document.getElementById("out");
+        var txt=document.getElementById("txt");
+        /*在外部申请一个空对象，来存储当前拖拽的这个dom元素*/
+        var targetLi=null;
+        var img=document.createElement('img');
+        img.src="img/garbage.png";
+
+ //  拖拽
+        for(var i=0;i<aLi.length;i++){
+            /*首先给每一个元素绑定鼠标按下的拖拽时按下的事件，此事件与原生js中的事件很相似*/
+            aLi[i].ondragstart=function (ev) {
+                /*拖拽某元素时，当前元素的背景色要变成黄色*/
+                this.style.background='yellow';
+                targetLi=this;
+                /*设置一下当前要携带的数据*/
+                ev.dataTransfer.setData('Text',this.innerHTML);
+                /*通过setDragImage方法设置图标，后两个值代表光标在x和y轴所代表的位置，可自行修改*/
+                ev.dataTransfer.setDragImage(img,20,20);
+            }
+
+            /*当元素停止拖拽时，把背景元素清空*/
+            aLi[i].ondragend=function () {
+                this.style.background="";
+            }
+        }
+
+        /*要拖放元素进入垃圾箱需要触发的事件,修改边框颜色*/
+        oDiv.ondragenter=function () {
+            this.style.borderColor='red';
+        }
+        /*在垃圾箱内部持续移动时触发的事件，必须要阻止默认事件，否则drop无法触发*/
+        oDiv.ondragover=function (ev) {
+            ev.preventDefault()
+        }
+
+        /*拖拽元素离开投放区的事件*/
+        oDiv.ondragleave=function (ev) {
+            this.style.borderColor='#000';
+        }
+
+        /*拖放元素进入垃圾箱后要做的事件*/
+        oDiv.ondrop=function (ev) {
+            this.style.borderColor='#000';
+            /*把携带的文本数据取出来*/
+            var oText=ev.dataTransfer.getData('Text');
+            txt.innerHTML='删除的是：'+oText;
+            /*通过父节点ul删除子元素removeChild 来进行节点的删除*/
+            targetLi.parentNode.removeChild(targetLi);
+        }
+    }
+</script>
+</html>
